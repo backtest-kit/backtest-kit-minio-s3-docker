@@ -110,6 +110,7 @@ Everything lives in **one MinIO bucket `backtest-kit`** — each entity gets a r
 | **Memory** | `memory-items/` | `signalId/bucket/memoryId` | Per-signal memory store |
 | **Recent** | `recent-items/` | `symbol/strategy/exchange/frame/backtest` | Last public signal per context |
 | **State** | `state-items/` | `signalId/bucket` | Per-signal state buckets |
+| **Budget** | `budget-items/` | `strategy/exchange/frame/backtest/name` | Shared balance journal per strategy run |
 | **Session** | `session-items/` | `strategy/exchange/frame/symbol/backtest` | One session per running strategy |
 
 `⟲ts` = inverted timestamp (`MAX_SAFE_INTEGER − ms`, zero-padded): plain lexicographic S3 listing yields **newest first** with no sorting. † = entity also maintained in the Redis time index (see below).
