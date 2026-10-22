@@ -1,7 +1,7 @@
 import * as functools_kit from 'functools-kit';
 import { Redis } from 'ioredis';
 import * as minio from 'minio';
-import { CandleInterval, ISignalRow, IScheduledSignalRow, StrategyData, RiskData, PartialData, BreakevenData, IStorageSignalRow, NotificationModel, ILogEntry, MeasureData, IntervalData, MemoryData, IPublicSignalRow, StateData, SessionData } from 'backtest-kit';
+import { CandleInterval, ISignalRow, IScheduledSignalRow, StrategyData, RiskData, PartialData, BreakevenData, IStorageSignalRow, NotificationModel, ILogEntry, MeasureData, IntervalData, MemoryData, IPublicSignalRow, StateData, BudgetData, DictionaryData, SessionData } from 'backtest-kit';
 
 interface ILogger {
     log(topic: string, ...args: any[]): void;
@@ -972,6 +972,121 @@ declare class StateDataService extends StateDataService_base {
     findByContext: (signalId: string, bucketName: string) => Promise<IStateRow | null>;
 }
 
+interface IBudgetDto {
+    strategyName: string;
+    exchangeName: string;
+    frameName: string;
+    backtest: boolean;
+    name: string;
+    payload: BudgetData;
+    when: number;
+}
+interface IBudgetRow extends IBudgetDto {
+    id: string;
+    createDate: Date;
+    updatedDate: Date;
+}
+
+type BudgetRecordKey = {
+    strategyName: string;
+    exchangeName: string;
+    frameName: string;
+    backtest: boolean;
+};
+declare const BudgetDataService_base: (new () => {
+    readonly loggerService: LoggerService;
+    readonly minioService: MinioService;
+    readonly bucketName: string;
+    readonly rootPrefix: string;
+    readonly BUCKET_NAME: string;
+    set(key: string, value: unknown): Promise<void>;
+    get<T = unknown>(key: string | null): Promise<T | null>;
+    has(key: string): Promise<boolean>;
+    delete(key: string): Promise<void>;
+    clear(prefix?: string): Promise<void>;
+    keys(prefix?: string, limit?: number): AsyncIterableIterator<string>;
+    values(prefix?: string, limit?: number): AsyncIterableIterator<unknown>;
+    iterate(prefix?: string, limit?: number): AsyncIterableIterator<readonly [string, unknown]>;
+    toArray(prefix?: string): Promise<[string, unknown][]>;
+    size(prefix?: string): Promise<number>;
+}) & Omit<{
+    new (BUCKET_NAME: string): {
+        readonly loggerService: LoggerService;
+        readonly minioService: MinioService;
+        readonly bucketName: string;
+        readonly rootPrefix: string;
+        readonly BUCKET_NAME: string;
+        set(key: string, value: unknown): Promise<void>;
+        get<T = unknown>(key: string | null): Promise<T | null>;
+        has(key: string): Promise<boolean>;
+        delete(key: string): Promise<void>;
+        clear(prefix?: string): Promise<void>;
+        keys(prefix?: string, limit?: number): AsyncIterableIterator<string>;
+        values(prefix?: string, limit?: number): AsyncIterableIterator<unknown>;
+        iterate(prefix?: string, limit?: number): AsyncIterableIterator<readonly [string, unknown]>;
+        toArray(prefix?: string): Promise<[string, unknown][]>;
+        size(prefix?: string): Promise<number>;
+    };
+}, "prototype">;
+declare class BudgetDataService extends BudgetDataService_base {
+    readonly loggerService: LoggerService;
+    upsert: (key: BudgetRecordKey, name: string, payload: BudgetData, when: Date) => Promise<void>;
+    findByContext: (key: BudgetRecordKey, name: string) => Promise<IBudgetRow | null>;
+}
+
+interface IDictionaryDto {
+    signalId: string;
+    dictionaryName: string;
+    payload: DictionaryData;
+    when: number;
+}
+interface IDictionaryRow extends IDictionaryDto {
+    id: string;
+    createDate: Date;
+    updatedDate: Date;
+}
+
+declare const DictionaryDataService_base: (new () => {
+    readonly loggerService: LoggerService;
+    readonly minioService: MinioService;
+    readonly bucketName: string;
+    readonly rootPrefix: string;
+    readonly BUCKET_NAME: string;
+    set(key: string, value: unknown): Promise<void>;
+    get<T = unknown>(key: string | null): Promise<T | null>;
+    has(key: string): Promise<boolean>;
+    delete(key: string): Promise<void>;
+    clear(prefix?: string): Promise<void>;
+    keys(prefix?: string, limit?: number): AsyncIterableIterator<string>;
+    values(prefix?: string, limit?: number): AsyncIterableIterator<unknown>;
+    iterate(prefix?: string, limit?: number): AsyncIterableIterator<readonly [string, unknown]>;
+    toArray(prefix?: string): Promise<[string, unknown][]>;
+    size(prefix?: string): Promise<number>;
+}) & Omit<{
+    new (BUCKET_NAME: string): {
+        readonly loggerService: LoggerService;
+        readonly minioService: MinioService;
+        readonly bucketName: string;
+        readonly rootPrefix: string;
+        readonly BUCKET_NAME: string;
+        set(key: string, value: unknown): Promise<void>;
+        get<T = unknown>(key: string | null): Promise<T | null>;
+        has(key: string): Promise<boolean>;
+        delete(key: string): Promise<void>;
+        clear(prefix?: string): Promise<void>;
+        keys(prefix?: string, limit?: number): AsyncIterableIterator<string>;
+        values(prefix?: string, limit?: number): AsyncIterableIterator<unknown>;
+        iterate(prefix?: string, limit?: number): AsyncIterableIterator<readonly [string, unknown]>;
+        toArray(prefix?: string): Promise<[string, unknown][]>;
+        size(prefix?: string): Promise<number>;
+    };
+}, "prototype">;
+declare class DictionaryDataService extends DictionaryDataService_base {
+    readonly loggerService: LoggerService;
+    upsert: (signalId: string, dictionaryName: string, payload: DictionaryData, when: Date) => Promise<void>;
+    findByContext: (signalId: string, dictionaryName: string) => Promise<IDictionaryRow | null>;
+}
+
 interface ISessionDto {
     strategyName: string;
     exchangeName: string;
@@ -1047,6 +1162,8 @@ declare const ioc: {
     memoryDataService: MemoryDataService;
     recentDataService: RecentDataService;
     stateDataService: StateDataService;
+    budgetDataService: BudgetDataService;
+    dictionaryDataService: DictionaryDataService;
     sessionDataService: SessionDataService;
     loggerService: LoggerService;
     redisService: RedisService;
